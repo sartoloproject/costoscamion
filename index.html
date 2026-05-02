@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Costos — Camión Fiat Cursor 330 / Scania G 460</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, get }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ▼▼▼ REEMPLAZÁ CON TUS DATOS DE FIREBASE ▼▼▼
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBJK2BO2BRIQWILgpuWCYLTL31fj4ddbrw",
+    authDomain:        "sistemde-costos-camion.firebaseapp.com",
+    databaseURL:       "https://sistemde-costos-camion-default-rtdb.firebaseio.com",
+    projectId:         "sistemde-costos-camion",
+    storageBucket:     "sistemde-costos-camion.firebasestorage.app",
+    messagingSenderId: "1076245441998",
+    appId:             "1:1076245441998:web:0bc9d3dcb8bcf1c9af8f9f",
+    measurementId:     "G-GCGZ45609T"
+  };
+  // ▲▲▲ FIN ▲▲▲
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+  window._fbSet = (path, data) => set(ref(db, path), data);
+  window._fbGet = (path)       => get(ref(db, path));
+  window._firebaseReady = true;
+  console.log("Firebase OK — Costos Camion");
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f6fb;--surface:#fff;--surface2:#eef1f8;--border:#dde2f0;--border2:#c5cce0;
+  --accent:#2563eb;--accent-h:#1d4ed8;--green:#16a34a;--green-bg:#f0fdf4;
+  --red:#dc2626;--red-bg:#fef2f2;--amber:#d97706;--amber-bg:#fffbeb;
+  --text:#1a1f36;--muted:#64748b;--fijo:#2563eb;--var:#d97706;
+}
+body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;padding-bottom:60px}
+input,select,button{font-family:'Instrument Sans',sans-serif}
+
+header{background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 60%,#2563eb 100%);border-bottom:2px solid #1e3a8a;padding:28px 48px 24px;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,255,255,.09) 0%,transparent 70%);pointer-events:none}
+.header-badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px}
+h1{font-family:'DM Serif Display',serif;font-size:1.9rem;line-height:1.1;margin-bottom:5px;color:#fff}
+h1 span{color:#93c5fd;font-style:italic}
+.subtitle{color:rgba(255,255,255,.68);font-size:.86rem}
+
+.tab-nav{display:flex;background:#fff;border-bottom:1px solid var(--border);padding:0 48px;position:sticky;top:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow-x:auto}
+.tab-btn{padding:12px 17px;font-size:.8rem;font-weight:500;background:transparent;border:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-btn.inv-tab.active{color:#16a34a;border-bottom-color:#16a34a}
+.tab-btn.inv-tab{color:#15803d}
+
+main{padding:24px 48px}
+.panel{display:none}.panel.active{display:block}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:1.2rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.card-title{font-size:.82rem;font-weight:600;color:var(--text)}
+.badge{font-size:10px;padding:2px 9px;border-radius:20px;font-weight:500}
+.badge.fijo{background:#eff4ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.badge.var{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.badge.param{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.badge.inv{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.badge.scania{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+thead th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);font-weight:500;white-space:nowrap;background:var(--surface2)}
+thead th:first-child{text-align:left}
+tbody tr:hover td{background:#f7f9ff}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;text-align:right}
+tbody td:first-child{text-align:left}
+tbody tr:last-child td{border-bottom:none}
+tfoot td{padding:10px 12px;font-size:.8rem;text-align:right;background:var(--surface2);border-top:1px solid var(--border2);font-weight:600}
+tfoot td:first-child{text-align:left}
+
+input[type=text],input[type=number],select{background:#fff;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 8px;font-size:.78rem;width:100%;transition:border-color .15s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+input[type=text]:focus,input[type=number]:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+input[type=number]{text-align:right}
+
+.btn{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;padding:7px 13px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--text);cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;box-shadow:0 2px 5px rgba(37,99,235,.25)}
+.btn.primary:hover{background:var(--accent-h)}
+.btn.danger{color:var(--red);border-color:#fca5a5}.btn.danger:hover{background:var(--red-bg)}
+.btn.xs{padding:3px 8px;font-size:10px}
+
+.add-wrap{padding:13px 18px;border-top:1px solid var(--border);background:#fafbff}
+.add-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.add-row .field{display:flex;flex-direction:column;gap:4px}
+.add-row label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:'DM Mono',monospace}
+.add-row .field.grow{flex:1;min-width:120px}
+.add-row .field.sm{width:72px}
+.add-row .field.md{width:100px}
+
+.params-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;padding:15px 18px}
+.param-field{display:flex;flex-direction:column;gap:5px}
+.param-label{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.4px}
+
+.ptable{width:100%;border-collapse:collapse;font-size:.78rem}
+.ptable thead th{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:8px 12px;text-align:right;border-bottom:1px solid var(--border);background:var(--surface2);font-weight:500}
+.ptable thead th:first-child{text-align:left}
+.ptable tbody td{padding:7px 12px;border-bottom:1px solid var(--border);vertical-align:middle;text-align:right}
+.ptable tbody td:first-child{text-align:left;color:var(--muted);font-size:.76rem}
+.ptable tbody tr:last-child td{border-bottom:none}
+.ptable tbody tr:hover td{background:#f7f9ff}
+.ptable tfoot td{padding:8px 12px;background:var(--surface2);border-top:1px solid var(--border2);font-size:.76rem;font-weight:600;text-align:right}
+.ptable tfoot td:first-child{text-align:left}
+
+.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:.78rem;color:#3b82f6;margin:0 18px 14px}
+.info-box span{color:#1d4ed8;font-weight:600}
+.info-box.green{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.info-box.green span{color:#166534}
+.info-box.amber{background:#fffbeb;border-color:#fde68a;color:#b45309}
+.info-box.amber span{color:#92400e}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:11px;margin-bottom:1.2rem}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.metric.green{border-color:#bbf7d0;background:#f0fdf4}
+.metric.red{border-color:#fca5a5;background:#fef2f2}
+.metric.amber{border-color:#fde68a;background:#fffbeb}
+.metric .ml{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.metric.green .ml{color:#16a34a}
+.metric.red .ml{color:#dc2626}
+.metric.amber .ml{color:#d97706}
+.metric .mv{font-family:'DM Mono',monospace;font-size:1.15rem;font-weight:500;color:var(--text)}
+.metric.green .mv{color:#15803d}
+.metric.red .mv{color:#dc2626}
+.metric.amber .mv{color:#b45309}
+.metric .ms{font-size:.71rem;color:var(--muted);margin-top:3px}
+
+hr.div{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.sec-title{font-size:.88rem;font-weight:600}
+
+.res-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.2rem;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-bottom:1px solid var(--border);font-size:.85rem}
+.res-row:last-child{border-bottom:none}
+.res-row .rl{color:var(--muted)}
+.res-row .rv{font-family:'DM Mono',monospace;font-weight:500;color:var(--text)}
+.res-row.total{background:var(--surface2)}
+.res-row.total .rl{color:var(--text);font-weight:600}
+.res-row.total .rv{font-size:.96rem}
+.res-row.ganancia .rv{color:var(--green)!important}
+.res-row.quebranto .rv{color:var(--red)!important}
+.res-row.sub{background:#f8f9ff}
+
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:.74rem}
+.bar-label{width:175px;flex-shrink:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:var(--surface2);border-radius:4px;height:7px;overflow:hidden;border:1px solid var(--border)}
+.bar-fill{height:100%;border-radius:4px}
+.bar-pct{width:40px;text-align:right;color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem}
+.bar-amt{width:115px;text-align:right;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text)}
+.legend{display:flex;gap:16px;margin-bottom:11px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--muted)}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+
+.tag-f{font-size:9px;padding:2px 6px;border-radius:10px;background:#eff4ff;color:#1d4ed8;display:inline-block;border:1px solid #bfdbfe}
+.tag-v{font-size:9px;padding:2px 6px;border-radius:10px;background:#fffbeb;color:#b45309;display:inline-block;border:1px solid #fde68a}
+.auto-badge{font-size:9px;padding:1px 5px;border-radius:9px;background:#f0fdf4;color:#16a34a;margin-left:4px;border:1px solid #bbf7d0}
+
+.mono{font-family:'DM Mono',monospace}
+.clr-km{color:var(--accent);font-weight:600}
+.clr-tn{color:var(--amber);font-weight:600}
+
+/* ── INVERSIÓN ── */
+.inv-header{background:linear-gradient(135deg,#052e16 0%,#14532d 60%,#166534 100%);border-radius:11px;padding:22px 24px;margin-bottom:1.2rem;color:#fff;position:relative;overflow:hidden}
+.inv-header::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);pointer-events:none}
+.inv-header h2{font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:4px;color:#fff}
+.inv-header p{font-size:.8rem;color:rgba(255,255,255,.65)}
+
+.cuotas-table{width:100%;border-collapse:collapse;font-size:.77rem}
+.cuotas-table thead th{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);background:var(--surface2);font-weight:500}
+.cuotas-table thead th:first-child{text-align:center;width:5%}
+.cuotas-table tbody td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;font-family:'DM Mono',monospace;font-size:.74rem;color:var(--muted)}
+.cuotas-table tbody td:first-child{text-align:center;color:var(--text);font-weight:500}
+.cuotas-table tbody tr:hover td{background:#f7f9ff}
+.cuotas-table tfoot td{padding:8px 10px;background:var(--surface2);border-top:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:.75rem;font-weight:600;text-align:right;color:var(--text)}
+.cuotas-table tfoot td:first-child{text-align:left}
+.cuotas-table .col-cuota-ars{color:var(--red);font-weight:600}
+.cuotas-table .col-resultado{font-weight:600}
+.cuotas-table .col-resultado.pos{color:var(--green)}
+.cuotas-table .col-resultado.neg{color:var(--red)}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.2rem}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.kpi.green{border-color:#86efac;background:#f0fdf4}
+.kpi.red{border-color:#fca5a5;background:#fef2f2}
+.kpi.amber{border-color:#fde68a;background:#fffbeb}
+.kpi.blue{border-color:#bfdbfe;background:#eff4ff}
+.kpi .kl{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.kpi.green .kl{color:#16a34a}
+.kpi.red .kl{color:#dc2626}
+.kpi.amber .kl{color:#d97706}
+.kpi.blue .kl{color:#2563eb}
+.kpi .kv{font-family:'DM Mono',monospace;font-size:1.25rem;font-weight:600}
+.kpi.green .kv{color:#15803d}
+.kpi.red .kv{color:#dc2626}
+.kpi.amber .kv{color:#b45309}
+.kpi.blue .kv{color:#1d4ed8}
+.kpi .ks{font-size:.71rem;color:var(--muted);margin-top:3px}
+
+.section-divider{display:flex;align-items:center;gap:12px;margin:1.4rem 0 1rem}
+.section-divider span{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+@media(max-width:820px){
+  header,main,.tab-nav{padding-left:14px;padding-right:14px}
+  h1{font-size:1.4rem}
+  .params-grid{grid-template-columns:1fr 1fr}
+  .add-row{flex-direction:column}
+  .add-row .field{width:100%!important}
+  .tab-btn{padding:10px 11px;font-size:.76rem}
+}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:'Instrument Sans',sans-serif}
+.login-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:40px 36px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.5);text-align:center}
+.login-icon{width:52px;height:52px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.login-icon svg{width:28px;height:28px;fill:white}
+.login-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.login-field{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);background:white;text-align:center;letter-spacing:3px;margin-bottom:12px;transition:border-color 0.15s}
+.login-field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,0.12)}
+.login-field.error{border-color:var(--red);background:#fef2f2;animation:shake 0.35s}
+.login-btn{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s;margin-bottom:10px}
+.login-btn:hover{background:var(--accent-h)}
+.login-error{font-size:12px;color:var(--red);background:#fef2f2;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:none}
+.login-hint{font-size:11px;color:var(--muted);margin-top:6px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+    </div>
+    <div class="login-title">Costos Camión</div>
+    <div class="login-sub">Ingresá la contraseña para continuar</div>
+    <input type="password" id="login-input" class="login-field" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter') verificarPassword()" autocomplete="current-password">
+    <div class="login-error" id="login-error">❌ Contraseña incorrecta. Intentá de nuevo.</div>
+    <button class="login-btn" onclick="verificarPassword()">Ingresar →</button>
+    <div class="login-hint">Fiat Cursor 330 · Scania G 460</div>
+  </div>
+</div>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">Sistema de Costos · Transporte Propio</div>
+  <h1>Fiat Cursor 330 <span>+ Acoplado Hermann</span></h1>
+  <p class="subtitle">Productor Agropecuario · Costos fijos y variables · Análisis de inversión Scania G 460</p>
+</header>
+
+<div class="tab-nav">
+  <button class="tab-btn active"  onclick="showTab('fijos')">Costos fijos</button>
+  <button class="tab-btn"        onclick="showTab('variables')">Costos variables</button>
+  <button class="tab-btn"        onclick="showTab('p-operativo')">Parámetros</button>
+  <button class="tab-btn"        onclick="showTab('p-gasoil')">Gasoil</button>
+  <button class="tab-btn"        onclick="showTab('p-aceites')">Aceites</button>
+  <button class="tab-btn"        onclick="showTab('p-filtros')">Filtros</button>
+  <button class="tab-btn"        onclick="showTab('resumen')">Resumen</button>
+  <button class="tab-btn inv-tab" onclick="showTab('inversion')">📊 Inversión Scania</button>
+  <button id="btn-guardar-manual" onclick="guardarManual()" style="margin-left:auto;margin-right:8px;align-self:center;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s" onmouseover="this.style.background='var(--accent-h)'" onmouseout="this.style.background='var(--accent)'">
+    ☁️ Guardar
+  </button>
+</div>
+
+<main>
+
+<!-- ══════════════ COSTOS FIJOS ══════════════ -->
+<div class="panel active" id="panel-fijos">
+  <div class="sec-header">
+    <span class="sec-title">Costos fijos mensuales</span>
+    <span class="badge fijo">No varían con los km recorridos</span>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th style="text-align:left;width:36%">Concepto</th>
+        <th style="width:9%">Cantidad</th><th style="width:10%">Unidad</th>
+        <th style="width:17%">Importe ($)</th>
+        <th style="width:11%">$/km</th><th style="width:12%">$/tonelada</th><th style="width:5%"></th>
+      </tr></thead>
+      <tbody id="body-fijos"></tbody>
+      <tfoot><tr>
+        <td colspan="3" style="text-align:left">TOTAL COSTOS FIJOS</td>
+        <td style="color:var(--fijo)" id="tf-imp" class="mono">—</td>
+        <td style="color:var(--fijo)" id="tf-km"  class="mono">—</td>
+        <td style="color:var(--fijo)" id="tf-tn"  class="mono">—</td><td></td>
+      </tr></tfoot>
+    </table>
+    <div class="add-wrap"><div class="add-row">
+      <div class="field grow"><label>Concepto</label><input type="text" id="nf-c" placeholder="Ej: Seguro adicional"></div>
+      <div class="field sm"><label>Cantidad</label><input type="number" id="nf-q" placeholder="1" min="0" step="any"></div>
+      <div class="field md"><label>Unidad</label><select id="nf-u"><option>—</option><option>mes</option><option>u.</option><option>lts</option><option>kg</option><option>hs</option><option>km</option><option>viaje</option></select></div>
+      <div class="field md"><label>Importe ($)</label><input type="number" id="nf-i" placeholder="0" min="0" step="any"></div>
+      <button class="btn primary" onclick="addFijo()" style="align-self:flex-end">+ Agregar</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════ COSTOS VARIABLES ══════════════ -->
+<div class="panel" id="panel-variables">
+  <div class="sec-header">
+    <span class="sec-title">Costos variables mensuales</span>
+    <span class="badge var">Se calculan automáticamente desde los parámetros</span>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th style="text-align:left;width:34%">Concepto</th>
+        <th style="width:9%">Cantidad</th><th style="width:10%">Unidad</th>
+        <th style="width:17%">Importe ($)</th>
+        <th style="width:11%">$/km</th><th style="width:12%">$/tonelada</th><th style="width:7%"></th>
+      </tr></thead>
+      <tbody id="body-vars"></tbody>
+      <tfoot><tr>
+        <td colspan="3" style="text-align:left">TOTAL COSTOS VARIABLES</td>
+        <td style="color:var(--var)" id="tv-imp" class="mono">—</td>
+        <td style="color:var(--var)" id="tv-km"  class="mono">—</td>
+        <td style="color:var(--var)" id="tv-tn"  class="mono">—</td><td></td>
+      </tr></tfoot>
+    </table>
+    <div class="add-wrap"><div class="add-row">
+      <div class="field grow"><label>Concepto</label><input type="text" id="nv-c" placeholder="Ej: Peaje mensual"></div>
+      <div class="field sm"><label>Cantidad</label><input type="number" id="nv-q" placeholder="1" min="0" step="any"></div>
+      <div class="field md"><label>Unidad</label><select id="nv-u"><option>—</option><option>lts</option><option>u.</option><option>kg</option><option>km</option><option>hs</option><option>viaje</option><option>mes</option></select></div>
+      <div class="field md"><label>Importe ($)</label><input type="number" id="nv-i" placeholder="0" min="0" step="any"></div>
+      <button class="btn primary" onclick="addVar()" style="align-self:flex-end">+ Agregar</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════ PARÁMETROS OPERATIVOS ══════════════ -->
+<div class="panel" id="panel-p-operativo">
+  <div class="sec-header"><span class="sec-title">Parámetros operativos del mes</span></div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Datos de operación</span><span class="badge param">General</span></div>
+    <div class="params-grid">
+      <div class="param-field"><span class="param-label">Km totales / mes</span><input type="number" id="p-km" value="10080" min="1" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Viajes / mes</span><input type="number" id="p-viajes" value="12" min="1" oninput="recalcSueldo()"></div>
+      <div class="param-field"><span class="param-label">Toneladas / viaje</span><input type="number" id="p-tn" value="30" min="0.1" step="0.5" oninput="recalcSueldo()"></div>
+      <div class="param-field"><span class="param-label">Tarifa percibida ($ / tn)</span><input type="number" id="p-tarifa" value="1283" min="0" oninput="recalcSueldo()"></div>
+    </div>
+    <div class="info-box" id="sueldo-info">Sueldo chofer: tn totales × tarifa/tn × 18%</div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Cubiertas — vida útil y precios</span><span class="badge param">Cubiertas</span></div>
+    <div class="params-grid">
+      <div class="param-field"><span class="param-label">Cant. cub. delanteras</span><input type="number" id="q-del" value="2" min="1" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Precio cub. delantera ($)</span><input type="number" id="pr-del" value="580438" min="0" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Vida útil delantera (km)</span><input type="number" id="vu-del" value="120000" min="1" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Cant. cub. tracción</span><input type="number" id="q-trac" value="4" min="1" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Precio cub. tracción ($)</span><input type="number" id="pr-trac" value="530000" min="0" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Vida útil tracción (km)</span><input type="number" id="vu-trac" value="120000" min="1" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Cant. cub. acoplado</span><input type="number" id="q-acop" value="12" min="1" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Precio cub. acoplado ($)</span><input type="number" id="pr-acop" value="506368" min="0" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Vida útil acoplado (km)</span><input type="number" id="vu-acop" value="100000" min="1" oninput="recalc()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Repuestos y reparaciones</span><span class="badge param">Repuestos</span></div>
+    <div class="params-grid">
+      <div class="param-field"><span class="param-label">Repuestos / mes ($)</span><input type="number" id="p-repuestos" value="100000" min="0" oninput="recalc()"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ GASOIL ══════════════ -->
+<div class="panel" id="panel-p-gasoil">
+  <div class="sec-header"><span class="sec-title">Parámetros — Gasoil</span></div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Consumo y precio de gasoil</span><span class="badge param">Gasoil</span></div>
+    <div class="params-grid">
+      <div class="param-field"><span class="param-label">Precio gasoil ($ / lt)</span><input type="number" id="pr-gasoil" value="1366" min="0" oninput="recalc()"></div>
+      <div class="param-field"><span class="param-label">Consumo (lts / 100 km)</span><input type="number" id="cons-gasoil" value="30.7" min="0" step="0.1" oninput="recalc()"></div>
+    </div>
+    <div style="padding:0 18px 16px">
+      <table class="ptable">
+        <thead><tr><th style="text-align:left">Concepto</th><th>Lts / mes</th><th>Precio $ / lt</th><th>Costo / mes ($)</th><th>$ / km</th><th>$ / tn</th></tr></thead>
+        <tbody id="gasoil-detalle"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ACEITES ══════════════ -->
+<div class="panel" id="panel-p-aceites">
+  <div class="sec-header"><span class="sec-title">Parámetros — Aceites y lubricantes</span></div>
+  <p style="font-size:.79rem;color:var(--muted);margin-bottom:1rem">Fórmula: <strong>Costo/mes = (Precio × Capacidad) ÷ Vida útil (km) × Km recorridos/mes</strong></p>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Aceites — configuración individual</span><span class="badge param">Aceites</span></div>
+    <div style="padding:13px 18px 6px">
+      <table class="ptable">
+        <thead><tr>
+          <th style="text-align:left;width:22%">Lubricante</th>
+          <th style="width:12%">Cap. (lts)</th><th style="width:16%">Precio ($ / lt)</th>
+          <th style="width:14%">Vida útil (km)</th><th style="width:14%">Costo / mes ($)</th>
+          <th style="width:11%">$ / km</th><th style="width:11%">$ / tn</th>
+        </tr></thead>
+        <tbody id="aceites-params"></tbody>
+        <tfoot><tr>
+          <td colspan="4" style="text-align:left">TOTAL ACEITES</td>
+          <td id="tot-aceites-imp" class="mono" style="color:var(--accent)">—</td>
+          <td id="tot-aceites-km"  class="mono" style="color:var(--accent)">—</td>
+          <td id="tot-aceites-tn"  class="mono" style="color:var(--accent)">—</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div style="padding:5px 18px 12px;font-size:.73rem;color:var(--muted)">Los valores se transfieren automáticamente a Costos Variables.</div>
+  </div>
+</div>
+
+<!-- ══════════════ FILTROS ══════════════ -->
+<div class="panel" id="panel-p-filtros">
+  <div class="sec-header"><span class="sec-title">Parámetros — Filtros</span></div>
+  <p style="font-size:.79rem;color:var(--muted);margin-bottom:1rem">Fórmula: <strong>Costo/mes = (Precio × Cantidad) ÷ Vida útil (km) × Km recorridos/mes</strong></p>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Filtros — configuración individual</span><span class="badge param">Filtros</span></div>
+    <div style="padding:13px 18px 6px">
+      <table class="ptable">
+        <thead><tr>
+          <th style="text-align:left;width:24%">Filtro</th>
+          <th style="width:10%">Cantidad</th><th style="width:16%">Precio unitario ($)</th>
+          <th style="width:14%">Vida útil (km)</th><th style="width:14%">Costo / mes ($)</th>
+          <th style="width:11%">$ / km</th><th style="width:11%">$ / tn</th>
+        </tr></thead>
+        <tbody id="filtros-params"></tbody>
+        <tfoot><tr>
+          <td colspan="4" style="text-align:left">TOTAL FILTROS</td>
+          <td id="tot-filtros-imp" class="mono" style="color:var(--accent)">—</td>
+          <td id="tot-filtros-km"  class="mono" style="color:var(--accent)">—</td>
+          <td id="tot-filtros-tn"  class="mono" style="color:var(--accent)">—</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div style="padding:5px 18px 12px;font-size:.73rem;color:var(--muted)">Los valores se transfieren automáticamente a Costos Variables.</div>
+  </div>
+</div>
+
+<!-- ══════════════ RESUMEN ══════════════ -->
+<div class="panel" id="panel-resumen">
+  <div class="sec-header"><span class="sec-title">Indicadores clave del mes</span></div>
+  <div class="metric-grid" id="metrics"></div>
+  <hr class="div">
+  <div class="sec-header"><span class="sec-title">Distribución de costos</span></div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#2563eb"></div>Costo fijo</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#d97706"></div>Costo variable</div>
+  </div>
+  <div id="barras" style="margin-bottom:1.2rem"></div>
+  <hr class="div">
+  <div class="sec-header"><span class="sec-title">Detalle por rubro</span></div>
+  <div class="res-card" id="detalle"></div>
+  <hr class="div">
+  <div class="sec-header"><span class="sec-title">Estado de resultado mensual y proyección anual</span></div>
+  <div class="res-card" id="resultado"></div>
+</div>
+
+<!-- ══════════════ INVERSIÓN SCANIA ══════════════ -->
+<div class="panel" id="panel-inversion">
+
+  <div class="inv-header">
+    <h2>Análisis de Inversión — Scania G 460 A6X2 Super</h2>
+    <p>SURCAR AGROPECUARIA S.A.S · Financiación Scania Credit Argentina S.A. · 24 cuotas en USD</p>
+  </div>
+
+  <!-- KPIs de la operación financiera -->
+  <div class="section-divider"><span>Condiciones de la financiación</span></div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Datos del préstamo — Scania Credit Argentina</span><span class="badge scania">SCANIA G 460</span></div>
+    <div class="params-grid">
+      <div class="param-field"><span class="param-label">Valor de la unidad (USD)</span><input type="number" id="sc-valor" value="193000" min="0" oninput="renderInversion()"></div>
+      <div class="param-field"><span class="param-label">Anticipo (USD)</span><input type="number" id="sc-anticipo" value="57900" min="0" oninput="renderInversion()"></div>
+      <div class="param-field"><span class="param-label">Monto financiado (USD)</span><input type="number" id="sc-financiado" value="135100" min="0" oninput="renderInversion()"></div>
+      <div class="param-field"><span class="param-label">Cuota mensual s/IVA (USD)</span><input type="number" id="sc-cuota-usd" value="6110.21" min="0" step="0.01" oninput="renderInversion()"></div>
+      <div class="param-field"><span class="param-label">Tipo de cambio USD → $</span><input type="number" id="sc-tc" value="1180" min="1" oninput="renderInversion()"></div>
+      <div class="param-field"><span class="param-label">Plazo (meses)</span><input type="number" id="sc-plazo" value="24" min="1" max="60" oninput="renderInversion()"></div>
+      <div class="param-field"><span class="param-label">Tasa anual (% en USD)</span><input type="number" id="sc-tasa" value="8" min="0" step="0.01" oninput="renderInversion()"></div>
+      <div class="param-field"><span class="param-label">IVA sobre intereses (%)</span><input type="number" id="sc-iva" value="21" min="0" step="0.01" oninput="renderInversion()"></div>
+    </div>
+    <div class="info-box amber" style="margin:0 18px 14px">
+      <span>Importante:</span> El tipo de cambio impacta directamente en el costo de la cuota en pesos y en la rentabilidad del proyecto. Actualizarlo con la cotización del día.
+    </div>
+  </div>
+
+  <!-- KPIs dinámicos -->
+  <div class="section-divider"><span>Indicadores del proyecto</span></div>
+  <div class="kpi-grid" id="kpi-inversion"></div>
+
+  <!-- Tabla de cuotas con resultado por mes -->
+  <div class="section-divider"><span>Caída de cuotas + resultado operativo mensual</span></div>
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Cuota en USD · Conversión a $ · Resultado operativo neto por mes</span>
+      <span class="badge inv">24 meses</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="cuotas-table">
+        <thead><tr>
+          <th>Cuota</th>
+          <th>Saldo cap. (USD)</th>
+          <th>Amort. (USD)</th>
+          <th>Interés (USD)</th>
+          <th>Cuota s/IVA (USD)</th>
+          <th>IVA (USD)</th>
+          <th>Cuota final (USD)</th>
+          <th>Cuota final ($)</th>
+          <th>Resultado op. ($)</th>
+          <th>Resultado acum. ($)</th>
+        </tr></thead>
+        <tbody id="cuotas-body"></tbody>
+        <tfoot id="cuotas-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Análisis ROI -->
+  <div class="section-divider"><span>Rentabilidad y retorno sobre inversión</span></div>
+  <div class="res-card" id="roi-card"></div>
+
+</div>
+</main>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DATOS MAESTROS
+══════════════════════════════════════════════════════ */
+const UNITS=['—','mes','u.','lts','kg','hs','km','viaje'];
+const fmt  = n => Math.round(n).toLocaleString('es-AR');
+const fmtD = (n,d=2) => n.toFixed(d).replace('.',',');
+const fmtU = (n,d=2) => n.toFixed(d);           // formato USD
+const gp   = id => parseFloat(document.getElementById(id).value)||0;
+const uOpts= sel => UNITS.map(u=>`<option${u===sel?' selected':''}>${u}</option>`).join('');
+const esc  = s => String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;');
+
+let fijos=[
+  {c:'Patente chasis',q:1,u:'mes',i:30000},
+  {c:'Patente acoplado',q:1,u:'mes',i:25000},
+  {c:'Seguro automotor chasis',q:1,u:'mes',i:200000},
+  {c:'Seguro de carga chasis',q:1,u:'mes',i:80000},
+  {c:'Seguro automotor acoplado',q:1,u:'mes',i:120000},
+  {c:'Seguro de carga acoplado',q:1,u:'mes',i:75000},
+  {c:'Seguro accidentes personales chofer',q:1,u:'mes',i:45000},
+  {c:'Cargas sociales',q:1,u:'mes',i:500000},
+];
+
+let vars=[
+  {c:'Cubiertas delanteras chasis',q:2, u:'u.',i:0,key:'del'},
+  {c:'Cubiertas tracción chasis',  q:4, u:'u.',i:0,key:'trac'},
+  {c:'Cubiertas acoplado',         q:12,u:'u.',i:0,key:'acop'},
+  {c:'Gasoil',                     q:0, u:'lts',i:0,key:'gasoil'},
+  {c:'Sueldo chofer (18% flete)',  q:1, u:'mes',i:0,key:'sueldo'},
+  {c:'Repuestos y reparaciones',   q:1, u:'mes',i:0,key:'repuestos'},
+];
+
+let aceites=[
+  {c:'Aceite motor',         cap:30,   pr:8400,  vu:30000,i:0},
+  {c:'Aceite de caja',       cap:8.8,  pr:34695, vu:80000,i:0},
+  {c:'Aceite de diferencial',cap:17,   pr:96146, vu:80000,i:0},
+];
+
+let filtros=[
+  {c:'Filtro de aceite',       cant:1,pr:15000,vu:15000,i:0},
+  {c:'Filtro de gasoil',       cant:1,pr:12000,vu:15000,i:0},
+  {c:'Filtro trampa gasoil',   cant:1,pr:18000,vu:20000,i:0},
+  {c:'Filtro de aire',         cant:1,pr:22000,vu:30000,i:0},
+  {c:'Filtro de aire interno', cant:1,pr:18000,vu:30000,i:0},
+  {c:'Filtro de secado',       cant:1,pr:14000,vu:60000,i:0},
+];
+
+/* Tabla oficial de cuotas del PDF */
+const CUOTAS_PDF=[
+  {n:1, sal:135100.00,am:5209.54,int:900.67,cuota:6110.21,iva:189.14,final:6299.35},
+  {n:2, sal:129890.46,am:5244.27,int:865.94,cuota:6110.21,iva:181.85,final:6292.05},
+  {n:3, sal:124646.19,am:5279.23,int:830.97,cuota:6110.21,iva:174.50,final:6284.71},
+  {n:4, sal:119366.96,am:5314.43,int:795.78,cuota:6110.21,iva:167.11,final:6277.32},
+  {n:5, sal:114052.53,am:5349.86,int:760.35,cuota:6110.21,iva:159.67,final:6269.88},
+  {n:6, sal:108702.67,am:5385.52,int:724.68,cuota:6110.21,iva:152.18,final:6262.39},
+  {n:7, sal:103317.15,am:5421.43,int:688.78,cuota:6110.21,iva:144.64,final:6254.85},
+  {n:8, sal:97895.72, am:5457.57,int:652.64,cuota:6110.21,iva:137.05,final:6247.26},
+  {n:9, sal:92438.15, am:5493.95,int:616.25,cuota:6110.21,iva:129.41,final:6239.62},
+  {n:10,sal:86944.20, am:5530.58,int:579.63,cuota:6110.21,iva:121.72,final:6231.93},
+  {n:11,sal:81413.62, am:5567.45,int:542.76,cuota:6110.21,iva:113.98,final:6224.19},
+  {n:12,sal:75846.17, am:5604.57,int:505.64,cuota:6110.21,iva:106.18,final:6216.39},
+  {n:13,sal:70241.61, am:5641.93,int:468.28,cuota:6110.21,iva:98.34, final:6208.55},
+  {n:14,sal:64599.68, am:5679.54,int:430.66,cuota:6110.21,iva:90.44, final:6200.65},
+  {n:15,sal:58920.14, am:5717.41,int:392.80,cuota:6110.21,iva:82.49, final:6192.70},
+  {n:16,sal:53202.73, am:5755.52,int:354.68,cuota:6110.21,iva:74.48, final:6184.69},
+  {n:17,sal:47447.21, am:5793.89,int:316.31,cuota:6110.21,iva:66.43, final:6176.63},
+  {n:18,sal:41653.31, am:5832.52,int:277.69,cuota:6110.21,iva:58.31, final:6168.52},
+  {n:19,sal:35820.80, am:5871.40,int:238.81,cuota:6110.21,iva:50.15, final:6160.36},
+  {n:20,sal:29949.39, am:5910.54,int:199.66,cuota:6110.21,iva:41.93, final:6152.14},
+  {n:21,sal:24038.85, am:5949.95,int:160.26,cuota:6110.21,iva:33.65, final:6143.86},
+  {n:22,sal:18088.90, am:5989.61,int:120.59,cuota:6110.21,iva:25.32, final:6135.53},
+  {n:23,sal:12099.29, am:6029.55,int:80.66, cuota:6110.21,iva:16.94, final:6127.15},
+  {n:24,sal:6069.74,  am:6069.74,int:40.46, cuota:6110.21,iva:8.50,  final:6118.70},
+];
+
+/* ══════════════════════════════════════════════════════
+   CÁLCULO CENTRAL
+══════════════════════════════════════════════════════ */
+function setVar(key,field,val){const idx=vars.findIndex(v=>v.key===key);if(idx>=0)vars[idx][field]=val;}
+
+function recalcSueldo(){
+  const vj=gp('p-viajes'),tn=gp('p-tn'),tar=gp('p-tarifa');
+  const totalTn=vj*tn,s=Math.round(totalTn*tar*0.18);
+  setVar('sueldo','i',s);
+  document.getElementById('sueldo-info').innerHTML=
+    `Sueldo chofer = <span>${fmt(totalTn)} tn</span> × <span>$${fmt(tar)}/tn</span> × <span>18%</span> = <span>$${fmt(s)} / mes</span>`;
+  recalc();
+}
+
+function recalc(){
+  const km=gp('p-km'),vj=gp('p-viajes'),tn=gp('p-tn'),tar=gp('p-tarifa'),totalTn=vj*tn;
+  const vuD=gp('vu-del'),vuT=gp('vu-trac'),vuA=gp('vu-acop');
+  const prD=gp('pr-del'),prT=gp('pr-trac'),prA=gp('pr-acop');
+  const qD=gp('q-del'),qT=gp('q-trac'),qA=gp('q-acop');
+  setVar('del','i',Math.round(qD*prD/vuD*km));   setVar('del','q',qD);
+  setVar('trac','i',Math.round(qT*prT/vuT*km));  setVar('trac','q',qT);
+  setVar('acop','i',Math.round(qA*prA/vuA*km));  setVar('acop','q',qA);
+  const lts=Math.round(km*gp('cons-gasoil')/100);
+  setVar('gasoil','q',lts);setVar('gasoil','i',Math.round(lts*gp('pr-gasoil')));
+  setVar('repuestos','i',gp('p-repuestos'));
+  aceites.forEach(a=>{a.i=km>0&&a.vu>0?Math.round(a.pr*a.cap/a.vu*km):0;});
+  filtros.forEach(f=>{f.i=km>0&&f.vu>0?Math.round(f.pr*f.cant/f.vu*km):0;});
+  renderAll(km,totalTn);
+  renderInversion();
+  // Guardado automático con debounce — SOLO si no estamos en medio de una carga
+  if(!_cargando){
+    clearTimeout(window._saveTimer);
+    window._saveTimer = setTimeout(guardarEstado, 1000);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDERS BASE
+══════════════════════════════════════════════════════ */
+function renderAll(km,tn){
+  renderFijos(km,tn);renderVarsTable(km,tn);
+  renderGasoilDetalle(km,tn);renderAceitesParams(km,tn);renderFiltrosParams(km,tn);
+  renderResumen(km,tn,gp('p-viajes'),gp('p-tarifa'));
+}
+
+function renderFijos(km,tn){
+  let tot=0;
+  document.getElementById('body-fijos').innerHTML=fijos.map((f,i)=>{
+    tot+=f.i;const kv=km>0?f.i/km:0,tv=tn>0?f.i/tn:0;
+    return`<tr>
+      <td><input type="text" value="${esc(f.c)}" onchange="fijos[${i}].c=this.value" style="font-size:.78rem"></td>
+      <td><input type="number" value="${f.q}" min="0" step="any" onchange="fijos[${i}].q=parseFloat(this.value)||0" style="font-size:.78rem;width:56px"></td>
+      <td><select onchange="fijos[${i}].u=this.value" style="font-size:.75rem;padding:4px 5px">${uOpts(f.u)}</select></td>
+      <td><input type="number" value="${f.i}" min="0" onchange="fijos[${i}].i=parseFloat(this.value)||0;recalc()" style="font-size:.78rem;width:100px"></td>
+      <td class="mono" style="font-size:.72rem;color:var(--muted)">${fmtD(kv,2)}</td>
+      <td class="mono" style="font-size:.72rem;color:var(--muted)">${tn>0?fmtD(tv,2):'—'}</td>
+      <td><button class="btn danger xs" onclick="fijos.splice(${i},1);recalc()">✕</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tf-imp').textContent='$'+fmt(tot);
+  document.getElementById('tf-km').textContent=km>0?'$'+fmtD(tot/km,2):'—';
+  document.getElementById('tf-tn').textContent=tn>0?'$'+fmtD(tot/tn,2):'—';
+}
+
+function renderVarsTable(km,tn){
+  const allRows=[...vars.map((v,i)=>({...v,src:'var',idx:i})),...aceites.map((a,i)=>({c:a.c,q:a.cap,u:'lts',i:a.i,src:'aceite',idx:i})),...filtros.map((f,i)=>({c:f.c,q:f.cant,u:'u.',i:f.i,src:'filtro',idx:i}))];
+  let tot=0;
+  document.getElementById('body-vars').innerHTML=allRows.map(row=>{
+    tot+=row.i;const kv=km>0?row.i/km:0,tv=tn>0?row.i/tn:0;
+    const isAuto=(row.src==='var'&&row.key!=='repuestos')||(row.src==='aceite')||(row.src==='filtro');
+    const badge=isAuto?'<span class="auto-badge">auto</span>':'';
+    let iCell=row.src==='var'&&row.key==='repuestos'
+      ?`<input type="number" value="${row.i}" min="0" onchange="setVar('repuestos','i',parseFloat(this.value)||0);recalc()" style="font-size:.78rem;width:100px">`
+      :`<span class="mono" style="font-size:.78rem">$${fmt(row.i)}</span>`;
+    const delBtn=['del','trac','acop','gasoil','sueldo','repuestos'].includes(row.key)?''
+      :`<button class="btn danger xs" onclick="${row.src==='aceite'?`aceites.splice(${row.idx},1)`:`filtros.splice(${row.idx},1)`};recalc()">✕</button>`;
+    return`<tr>
+      <td><span style="font-size:.78rem">${esc(row.c)}</span>${badge}</td>
+      <td class="mono" style="font-size:.73rem;color:var(--muted)">${row.q}</td>
+      <td style="font-size:.73rem;color:var(--muted)">${row.u}</td>
+      <td>${iCell}</td>
+      <td class="mono" style="font-size:.72rem;color:var(--muted)">${fmtD(kv,2)}</td>
+      <td class="mono" style="font-size:.72rem;color:var(--muted)">${tn>0?fmtD(tv,2):'—'}</td>
+      <td>${delBtn}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tv-imp').textContent='$'+fmt(tot);
+  document.getElementById('tv-km').textContent=km>0?'$'+fmtD(tot/km,2):'—';
+  document.getElementById('tv-tn').textContent=tn>0?'$'+fmtD(tot/tn,2):'—';
+}
+
+function renderGasoilDetalle(km,tn){
+  const lts=Math.round(km*gp('cons-gasoil')/100),pr=gp('pr-gasoil'),costo=lts*pr;
+  const kv=km>0?costo/km:0,tv=tn>0?costo/tn:0;
+  document.getElementById('gasoil-detalle').innerHTML=`<tr>
+    <td style="text-align:left">Gasoil</td>
+    <td class="mono">${fmt(lts)}</td><td class="mono">$${fmt(pr)}</td>
+    <td class="mono">$${fmt(costo)}</td>
+    <td class="mono clr-km">${fmtD(kv,2)}</td><td class="mono clr-tn">${tn>0?fmtD(tv,2):'—'}</td>
+  </tr>`;
+}
+
+function renderAceitesParams(km,tn){
+  let tot=0;
+  document.getElementById('aceites-params').innerHTML=aceites.map((a,i)=>{
+    tot+=a.i;const kv=km>0?a.i/km:0,tv=tn>0?a.i/tn:0;
+    return`<tr>
+      <td><input type="text" value="${esc(a.c)}" onchange="aceites[${i}].c=this.value;recalc()" style="font-size:.77rem"></td>
+      <td><input type="number" value="${a.cap}" min="0" step="0.1" onchange="aceites[${i}].cap=parseFloat(this.value)||0;recalc()" style="font-size:.77rem;width:65px"></td>
+      <td><input type="number" value="${a.pr}" min="0" onchange="aceites[${i}].pr=parseFloat(this.value)||0;recalc()" style="font-size:.77rem;width:88px"></td>
+      <td><input type="number" value="${a.vu}" min="1" onchange="aceites[${i}].vu=parseFloat(this.value)||1;recalc()" style="font-size:.77rem;width:88px"></td>
+      <td class="mono clr-km">$${fmt(a.i)}</td>
+      <td class="mono" style="font-size:.73rem;color:var(--muted)">${fmtD(kv,2)}</td>
+      <td class="mono" style="font-size:.73rem;color:var(--muted)">${tn>0?fmtD(tv,2):'—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tot-aceites-imp').textContent='$'+fmt(tot);
+  document.getElementById('tot-aceites-km').textContent=km>0?'$'+fmtD(tot/km,2):'—';
+  document.getElementById('tot-aceites-tn').textContent=tn>0?'$'+fmtD(tot/tn,2):'—';
+}
+
+function renderFiltrosParams(km,tn){
+  let tot=0;
+  document.getElementById('filtros-params').innerHTML=filtros.map((f,i)=>{
+    tot+=f.i;const kv=km>0?f.i/km:0,tv=tn>0?f.i/tn:0;
+    return`<tr>
+      <td><input type="text" value="${esc(f.c)}" onchange="filtros[${i}].c=this.value;recalc()" style="font-size:.77rem"></td>
+      <td><input type="number" value="${f.cant}" min="0" onchange="filtros[${i}].cant=parseFloat(this.value)||0;recalc()" style="font-size:.77rem;width:56px"></td>
+      <td><input type="number" value="${f.pr}" min="0" onchange="filtros[${i}].pr=parseFloat(this.value)||0;recalc()" style="font-size:.77rem;width:88px"></td>
+      <td><input type="number" value="${f.vu}" min="1" onchange="filtros[${i}].vu=parseFloat(this.value)||1;recalc()" style="font-size:.77rem;width:88px"></td>
+      <td class="mono clr-km">$${fmt(f.i)}</td>
+      <td class="mono" style="font-size:.73rem;color:var(--muted)">${fmtD(kv,2)}</td>
+      <td class="mono" style="font-size:.73rem;color:var(--muted)">${tn>0?fmtD(tv,2):'—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tot-filtros-imp').textContent='$'+fmt(tot);
+  document.getElementById('tot-filtros-km').textContent=km>0?'$'+fmtD(tot/km,2):'—';
+  document.getElementById('tot-filtros-tn').textContent=tn>0?'$'+fmtD(tot/tn,2):'—';
+}
+
+function renderResumen(km,tn,vj,tar){
+  const totF=fijos.reduce((a,b)=>a+b.i,0);
+  const totVbase=vars.reduce((a,b)=>a+b.i,0);
+  const totAceites=aceites.reduce((a,b)=>a+b.i,0);
+  const totFiltros=filtros.reduce((a,b)=>a+b.i,0);
+  const totV=totVbase+totAceites+totFiltros,totC=totF+totV,ing=tn*tar,res=ing-totC;
+
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="ml">Total costos / mes</div><div class="mv">$${fmt(totC)}</div><div class="ms">Fijos + Variables</div></div>
+    <div class="metric"><div class="ml">Costo por km</div><div class="mv">${km>0?'$'+fmtD(totC/km,2):'—'}</div><div class="ms">${fmt(km)} km/mes</div></div>
+    <div class="metric"><div class="ml">Costo por tonelada</div><div class="mv">${tn>0?'$'+fmtD(totC/tn,2):'—'}</div><div class="ms">${fmt(tn)} tn/mes</div></div>
+    <div class="metric"><div class="ml">Ingresos / mes</div><div class="mv">$${fmt(ing)}</div><div class="ms">${fmt(tn)} tn × $${fmt(tar)}</div></div>
+  `;
+  const allItems=[...fijos.map(f=>({label:f.c,val:f.i,tipo:'f'})),...vars.map(v=>({label:v.c,val:v.i,tipo:'v'})),...aceites.map(a=>({label:a.c,val:a.i,tipo:'v'})),...filtros.map(f=>({label:f.c,val:f.i,tipo:'v'}))].filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
+  const maxV=allItems.length>0?allItems[0].val:1;
+  document.getElementById('barras').innerHTML=allItems.map(it=>{
+    const pct=totC>0?it.val/totC*100:0,fill=it.tipo==='f'?'#2563eb':'#d97706',w=Math.round(it.val/maxV*100);
+    return`<div class="bar-row"><div class="bar-label" title="${it.label}">${it.label}</div><div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${fill}"></div></div><div class="bar-pct">${fmtD(pct,1)}%</div><div class="bar-amt">$${fmt(it.val)}</div></div>`;
+  }).join('');
+
+  document.getElementById('detalle').innerHTML=`
+    <div class="res-row"><div class="rl"><span class="tag-f">Fijos</span>&nbsp; Subtotal costos fijos</div><div class="rv">$${fmt(totF)}</div></div>
+    <div class="res-row sub"><div class="rl">— $/km fijos</div><div class="rv" style="font-size:.78rem">${km>0?'$'+fmtD(totF/km,2):'—'}</div></div>
+    <div class="res-row sub"><div class="rl">— $/tn fijos</div><div class="rv" style="font-size:.78rem">${tn>0?'$'+fmtD(totF/tn,2):'—'}</div></div>
+    <div class="res-row"><div class="rl"><span class="tag-v">Variables</span>&nbsp; Cubiertas + Gasoil + Sueldo + Repuestos</div><div class="rv">$${fmt(totVbase)}</div></div>
+    <div class="res-row"><div class="rl"><span class="tag-v">Variables</span>&nbsp; Aceites</div><div class="rv">$${fmt(totAceites)}</div></div>
+    <div class="res-row"><div class="rl"><span class="tag-v">Variables</span>&nbsp; Filtros</div><div class="rv">$${fmt(totFiltros)}</div></div>
+    <div class="res-row sub"><div class="rl">— $/km variables</div><div class="rv" style="font-size:.78rem">${km>0?'$'+fmtD(totV/km,2):'—'}</div></div>
+    <div class="res-row sub"><div class="rl">— $/tn variables</div><div class="rv" style="font-size:.78rem">${tn>0?'$'+fmtD(totV/tn,2):'—'}</div></div>
+    <div class="res-row total"><div class="rl">Total costos</div><div class="rv">$${fmt(totC)}</div></div>
+    <div class="res-row total"><div class="rl">Costo total / km</div><div class="rv">${km>0?'$'+fmtD(totC/km,2):'—'}</div></div>
+    <div class="res-row total"><div class="rl">Costo total / tonelada</div><div class="rv">${tn>0?'$'+fmtD(totC/tn,2):'—'}</div></div>
+  `;
+  const cls=res>=0?'ganancia':'quebranto';
+  document.getElementById('resultado').innerHTML=`
+    <div class="res-row"><div class="rl">Ingresos (${fmt(tn)} tn × $${fmt(tar)}/tn)</div><div class="rv" style="color:var(--green)">$${fmt(ing)}</div></div>
+    <div class="res-row"><div class="rl">Total costos</div><div class="rv" style="color:var(--red)">($${fmt(totC)})</div></div>
+    <div class="res-row total ${cls}"><div class="rl">Resultado mensual (sin cuota Scania)</div><div class="rv">${res>=0?'+':'-'}$${fmt(Math.abs(res))}</div></div>
+    <div class="res-row total ${cls}"><div class="rl">Proyección anual (× 12 meses)</div><div class="rv">${res>=0?'+':'-'}$${fmt(Math.abs(res)*12)}</div></div>
+    <div class="res-row"><div class="rl">Margen sobre ingresos</div><div class="rv">${ing>0?fmtD(res/ing*100,2)+'%':'—'}</div></div>
+    <div class="res-row"><div class="rl">Resultado por viaje</div><div class="rv">${gp('p-viajes')>0?(res>=0?'+':'-')+'$'+fmt(Math.abs(res/gp('p-viajes'))):'—'}</div></div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER INVERSIÓN SCANIA
+══════════════════════════════════════════════════════ */
+function renderInversion(){
+  const tc      = gp('sc-tc');
+  const plazo   = Math.min(Math.round(gp('sc-plazo')),24);
+  const valor   = gp('sc-valor');
+  const anticipo= gp('sc-anticipo');
+  const financ  = gp('sc-financiado');
+
+  // Resultado operativo mensual (sin cuota) tomado del sistema de costos
+  const km=gp('p-km'),vj=gp('p-viajes'),tn=gp('p-tn'),tar=gp('p-tarifa'),totalTn=vj*tn;
+  const totF=fijos.reduce((a,b)=>a+b.i,0);
+  const totVbase=vars.reduce((a,b)=>a+b.i,0);
+  const totAceites=aceites.reduce((a,b)=>a+b.i,0);
+  const totFiltros=filtros.reduce((a,b)=>a+b.i,0);
+  const totC=totF+totVbase+totAceites+totFiltros;
+  const ing=totalTn*tar;
+  const resOpMensual=ing-totC;   // resultado ANTES de la cuota
+
+  // Tabla de cuotas con resultado neto
+  let acum=0;
+  let totCuotaFinalUSD=0, totCuotaFinalARS=0, totResNeto=0;
+  const rows=CUOTAS_PDF.slice(0,plazo).map(q=>{
+    const cuotaARS=q.final*tc;
+    const resNeto=resOpMensual-cuotaARS;
+    acum+=resNeto;
+    totCuotaFinalUSD+=q.final;
+    totCuotaFinalARS+=cuotaARS;
+    totResNeto+=resNeto;
+    const cls=resNeto>=0?'pos':'neg';
+    return`<tr>
+      <td>${q.n}</td>
+      <td>${fmtU(q.sal)}</td>
+      <td>${fmtU(q.am)}</td>
+      <td>${fmtU(q.int)}</td>
+      <td>${fmtU(q.cuota)}</td>
+      <td>${fmtU(q.iva)}</td>
+      <td class="col-cuota-ars">${fmtU(q.final)}</td>
+      <td class="col-cuota-ars">$${fmt(cuotaARS)}</td>
+      <td class="col-resultado ${cls}">${resNeto>=0?'+':'-'}$${fmt(Math.abs(resNeto))}</td>
+      <td class="col-resultado ${cls}">${acum>=0?'+':'-'}$${fmt(Math.abs(acum))}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('cuotas-body').innerHTML=rows;
+  document.getElementById('cuotas-foot').innerHTML=`<tr>
+    <td style="text-align:left">TOTAL ${plazo} meses</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+    <td class="mono">USD ${fmtU(totCuotaFinalUSD)}</td>
+    <td class="mono" style="color:var(--red)">$${fmt(totCuotaFinalARS)}</td>
+    <td class="mono ${totResNeto>=0?'':''}"><span style="color:${totResNeto>=0?'var(--green)':'var(--red)'}">${totResNeto>=0?'+':'-'}$${fmt(Math.abs(totResNeto))}</span></td>
+    <td class="mono"><span style="color:${acum>=0?'var(--green)':'var(--red)'}">${acum>=0?'+':'-'}$${fmt(Math.abs(acum))}</span></td>
+  </tr>`;
+
+  // KPIs
+  const cuotaPromARS=(totCuotaFinalARS/plazo)||0;
+  const resNetoMensualProm=(totResNeto/plazo)||0;
+  const anticipo_ars=anticipo*tc;
+  const inversion_total_ars=anticipo_ars+totCuotaFinalARS; // anticipo + todas las cuotas
+  const roi=inversion_total_ars>0?(totResNeto/inversion_total_ars)*100:0;
+  const roiAnual=roi/(plazo/12);
+  const paybackMeses=resNetoMensualProm>0?(anticipo_ars/resNetoMensualProm):null;
+
+  document.getElementById('kpi-inversion').innerHTML=`
+    <div class="kpi blue"><div class="kl">Valor unidad (USD)</div><div class="kv">USD ${fmt(valor)}</div><div class="ks">Scania G 460 A6X2 Super</div></div>
+    <div class="kpi amber"><div class="kl">Anticipo (USD)</div><div class="kv">USD ${fmt(anticipo)}</div><div class="ks">≈ $${fmt(anticipo_ars)} al TC ${fmt(tc)}</div></div>
+    <div class="kpi blue"><div class="kl">Monto financiado (USD)</div><div class="kv">USD ${fmt(financ)}</div><div class="ks">70% del valor</div></div>
+    <div class="kpi amber"><div class="kl">Cuota final prom. / mes ($)</div><div class="kv">$${fmt(cuotaPromARS)}</div><div class="ks">USD 6.110,21 × TC ${fmt(tc)}</div></div>
+    <div class="kpi ${resOpMensual>=0?'green':'red'}"><div class="kl">Resultado op. / mes (sin cuota)</div><div class="kv">${resOpMensual>=0?'+':'-'}$${fmt(Math.abs(resOpMensual))}</div><div class="ks">Ingresos menos costos operativos</div></div>
+    <div class="kpi ${resNetoMensualProm>=0?'green':'red'}"><div class="kl">Resultado neto prom. / mes</div><div class="kv">${resNetoMensualProm>=0?'+':'-'}$${fmt(Math.abs(resNetoMensualProm))}</div><div class="ks">Después de cuota Scania</div></div>
+    <div class="kpi ${totResNeto>=0?'green':'red'}"><div class="kl">Resultado neto total (${plazo} m)</div><div class="kv">${totResNeto>=0?'+':'-'}$${fmt(Math.abs(totResNeto))}</div><div class="ks">Suma de resultados netos</div></div>
+    <div class="kpi ${roi>=0?'green':'red'}"><div class="kl">ROI sobre inversión total</div><div class="kv">${fmtD(roi,1)}%</div><div class="ks">En ${plazo} meses (${fmtD(roiAnual,1)}% anual)</div></div>
+  `;
+
+  // ROI detallado
+  const pb=paybackMeses!==null?`${fmtD(paybackMeses,1)} meses (≈ ${fmtD(paybackMeses/12,1)} años)`:'No se recupera (resultado neto negativo)';
+  const clsRoi=totResNeto>=0?'ganancia':'quebranto';
+  document.getElementById('roi-card').innerHTML=`
+    <div class="res-row"><div class="rl">Inversión inicial — Anticipo (USD ${fmt(anticipo)})</div><div class="rv">$${fmt(anticipo_ars)}</div></div>
+    <div class="res-row"><div class="rl">Total cuotas pagadas (${plazo} meses)</div><div class="rv" style="color:var(--red)">$${fmt(totCuotaFinalARS)}</div></div>
+    <div class="res-row"><div class="rl">Desembolso total del proyecto</div><div class="rv">$${fmt(inversion_total_ars)}</div></div>
+    <div class="res-row sub"><div class="rl">Resultado operativo acumulado (${plazo} meses)</div><div class="rv" style="color:var(--green)">$${fmt(resOpMensual*plazo)}</div></div>
+    <div class="res-row sub"><div class="rl">Total cuotas Scania pagadas</div><div class="rv" style="color:var(--red)">($${fmt(totCuotaFinalARS)})</div></div>
+    <div class="res-row total ${clsRoi}"><div class="rl">Resultado neto del proyecto (${plazo} meses)</div><div class="rv">${totResNeto>=0?'+':'-'}$${fmt(Math.abs(totResNeto))}</div></div>
+    <div class="res-row total ${clsRoi}"><div class="rl">ROI sobre desembolso total</div><div class="rv">${fmtD(roi,2)}%</div></div>
+    <div class="res-row total ${clsRoi}"><div class="rl">ROI anualizado</div><div class="rv">${fmtD(roiAnual,2)}% / año</div></div>
+    <div class="res-row"><div class="rl">Payback del anticipo</div><div class="rv">${pb}</div></div>
+    <div class="res-row"><div class="rl">Margen operativo mensual</div><div class="rv">${ing>0?fmtD(resOpMensual/ing*100,2)+'%':'—'}</div></div>
+    <div class="res-row"><div class="rl">Margen neto mensual (con cuota)</div><div class="rv">${ing>0?fmtD((resOpMensual-cuotaPromARS)/ing*100,2)+'%':'—'}</div></div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   TABS / AGREGAR
+══════════════════════════════════════════════════════ */
+const TAB_ORDER=['fijos','variables','p-operativo','p-gasoil','p-aceites','p-filtros','resumen','inversion'];
+function showTab(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn')[TAB_ORDER.indexOf(name)].classList.add('active');
+}
+function addFijo(){
+  const c=document.getElementById('nf-c').value.trim();
+  if(!c){alert('Ingrese el nombre del concepto');return;}
+  fijos.push({c,q:parseFloat(document.getElementById('nf-q').value)||1,u:document.getElementById('nf-u').value,i:parseFloat(document.getElementById('nf-i').value)||0});
+  ['nf-c','nf-q','nf-i'].forEach(id=>document.getElementById(id).value='');
+  recalc();
+}
+function addVar(){
+  const c=document.getElementById('nv-c').value.trim();
+  if(!c){alert('Ingrese el nombre del concepto');return;}
+  vars.push({c,q:parseFloat(document.getElementById('nv-q').value)||1,u:document.getElementById('nv-u').value,i:parseFloat(document.getElementById('nv-i').value)||0,key:'manual_'+Date.now()});
+  ['nv-c','nv-q','nv-i'].forEach(id=>document.getElementById(id).value='');
+  recalc();
+}
+
+/* ══════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════ */
+// ▼ CAMBIÁ ESTA CONTRASEÑA POR LA QUE QUIERAS ▼
+const PASSWORD_ACCESO = 'camion2526';
+// ▲ ─────────────────────────────────────────── ▲
+
+function verificarPassword(){
+  const input = document.getElementById('login-input');
+  const errorEl = document.getElementById('login-error');
+  if(input.value === PASSWORD_ACCESO){
+    localStorage.setItem('cc_sesion', Date.now() + 8*60*60*1000);
+    document.getElementById('login-screen').style.display = 'none';
+  } else {
+    input.classList.add('error');
+    errorEl.style.display = 'block';
+    input.value = '';
+    setTimeout(()=>input.classList.remove('error'), 400);
+    input.focus();
+  }
+}
+function verificarSesion(){
+  const exp = parseInt(localStorage.getItem('cc_sesion')||'0');
+  if(Date.now() < exp){
+    document.getElementById('login-screen').style.display = 'none';
+  } else {
+    setTimeout(()=>document.getElementById('login-input').focus(), 100);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   PERSISTENCIA — Firebase + localStorage
+   
+   LÓGICA CORRECTA:
+   - Guardar: captura fijos/vars/aceites/filtros + params (inputs con id)
+   - Restaurar: primero carga las variables JS, luego los params,
+     y llama recalcSueldo() UNA SOLA VEZ al final con _cargando=true
+     para que no dispare un guardado automático
+══════════════════════════════════════════════════════ */
+let _cargando = false;
+
+// IDs de todos los parámetros numéricos que hay que guardar/restaurar
+const PARAM_IDS = [
+  'p-km','p-viajes','p-tn','p-tarifa','p-repuestos',
+  'vu-del','vu-trac','vu-acop',
+  'pr-del','pr-trac','pr-acop',
+  'q-del','q-trac','q-acop',
+  'cons-gasoil','pr-gasoil',
+  'inv-precio','inv-enganche','inv-plazo','inv-tna','inv-tc'
+];
+
+function obtenerEstado(){
+  const params = {};
+  PARAM_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) params[id] = el.value;
+  });
+  return {
+    fijos:   JSON.parse(JSON.stringify(fijos)),
+    vars:    JSON.parse(JSON.stringify(vars)),
+    aceites: JSON.parse(JSON.stringify(aceites)),
+    filtros: JSON.parse(JSON.stringify(filtros)),
+    params,
+    ts: new Date().toISOString()
+  };
+}
+
+function guardarEstado(){
+  if(_cargando) return;
+  const estado = obtenerEstado();
+  try { localStorage.setItem('cc_estado', JSON.stringify(estado)); } catch(e){}
+  if(window._firebaseReady && window._fbSet){
+    window._fbSet('costos_camion', estado)
+      .then(()=> mostrarGuardado('☁️ Guardado en la nube'))
+      .catch(()=> mostrarGuardado('💾 Guardado local (sin conexión)'));
+  } else {
+    mostrarGuardado('💾 Guardado local');
+  }
+}
+
+function guardarManual(){
+  clearTimeout(window._saveTimer);
+  guardarEstado();
+}
+
+function restaurarDatos(d){
+  if(!d) return;
+  _cargando = true;
+  try {
+    // 1) Restaurar variables JS
+    if(d.fijos   && d.fijos.length)   fijos   = d.fijos;
+    if(d.vars    && d.vars.length)     vars    = d.vars;
+    if(d.aceites && d.aceites.length)  aceites = d.aceites;
+    if(d.filtros && d.filtros.length)  filtros = d.filtros;
+
+    // 2) Restaurar parámetros en el DOM ANTES de recalcular
+    if(d.params){
+      Object.entries(d.params).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if(el) el.value = val;
+      });
+    }
+    // soporte legado: si venía con "inputs" en lugar de "params"
+    if(d.inputs && !d.params){
+      Object.entries(d.inputs).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if(el) el.value = val;
+      });
+    }
+
+    // 3) Recalcular UNA sola vez con los datos ya restaurados
+    recalcSueldo();
+
+  } finally {
+    _cargando = false;
+  }
+}
+
+function cargarEstado(){
+  if(window._firebaseReady && window._fbGet){
+    window._fbGet('costos_camion').then(snap => {
+      const d = snap.val();
+      if(d){
+        restaurarDatos(d);
+        mostrarGuardado('✅ Datos cargados desde la nube');
+      } else {
+        _cargarDesdeLocal();
+      }
+    }).catch(() => {
+      _cargarDesdeLocal();
+      mostrarGuardado('📴 Sin conexión — datos locales');
+    });
+  } else {
+    let n = 0;
+    const t = setInterval(() => {
+      n++;
+      if(window._firebaseReady){ clearInterval(t); cargarEstado(); }
+      else if(n > 30){ clearInterval(t); _cargarDesdeLocal(); }
+    }, 100);
+  }
+}
+
+function _cargarDesdeLocal(){
+  try {
+    const loc = localStorage.getItem('cc_estado');
+    if(loc) restaurarDatos(JSON.parse(loc));
+  } catch(e){}
+}
+
+let _toastTimer;
+function mostrarGuardado(msg){
+  let t = document.getElementById('toast-guardado');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'toast-guardado';
+    t.style.cssText='position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;z-index:9999;transition:opacity 0.3s;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{ t.style.opacity='0'; }, 2500);
+}
+
+/* ══════════════════════════════════════════════════════
+   INICIO
+══════════════════════════════════════════════════════ */
+verificarSesion();
+cargarEstado(); // ya llama recalcSueldo() internamente al restaurar
+</script>
+</body>
+</html>
