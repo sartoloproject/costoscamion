@@ -6,13 +6,13 @@
 <title>Sistema de Costos — Camión Fiat Cursor 330 / Scania G 460</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- FIREBASE -->
+<!-- ══ FIREBASE SDK ══════════════════════════════════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, set, get }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // ▼▼▼ REEMPLAZÁ CON TUS DATOS DE FIREBASE ▼▼▼
+  // ▼▼▼ REEMPLAZÁ CON TUS CREDENCIALES DE FIREBASE ▼▼▼
   const firebaseConfig = {
   apiKey: "AIzaSyAjnw2jFbyKbTR0P69O8v6_BuNbwNiDGgg",
   authDomain: "costoscamiones.firebaseapp.com",
@@ -22,14 +22,14 @@
   messagingSenderId: "1018895520240",
   appId: "1:1018895520240:web:87ac891b00795c0eca0d35"
   };
-  // ▲▲▲ FIN ▲▲▲
+  // ▲▲▲ FIN CREDENCIALES ▲▲▲
 
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
   window._fbSet = (path, data) => set(ref(db, path), data);
   window._fbGet = (path)       => get(ref(db, path));
   window._firebaseReady = true;
-  console.log("Firebase OK — Costos Camion");
+  console.log('✅ Firebase conectado — Costos Camión');
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -225,10 +225,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
 .login-icon svg{width:28px;height:28px;fill:white}
 .login-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
-.login-field{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);background:white;text-align:center;letter-spacing:3px;margin-bottom:12px;transition:border-color 0.15s}
-.login-field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,0.12)}
-.login-field.error{border-color:var(--red);background:#fef2f2;animation:shake 0.35s}
-.login-btn{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s;margin-bottom:10px}
+.login-field{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);text-align:center;letter-spacing:3px;margin-bottom:12px;transition:border-color .15s}
+.login-field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.login-field.error{border-color:var(--red);background:#fef2f2;animation:shake .35s}
+.login-btn{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px;transition:background .15s}
 .login-btn:hover{background:var(--accent-h)}
 .login-error{font-size:12px;color:var(--red);background:#fef2f2;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:none}
 .login-hint{font-size:11px;color:var(--muted);margin-top:6px}
@@ -252,8 +252,6 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
     <div class="login-hint">Fiat Cursor 330 · Scania G 460</div>
   </div>
 </div>
-</head>
-<body>
 
 <header>
   <div class="header-badge">Sistema de Costos · Transporte Propio</div>
@@ -270,9 +268,8 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
   <button class="tab-btn"        onclick="showTab('p-filtros')">Filtros</button>
   <button class="tab-btn"        onclick="showTab('resumen')">Resumen</button>
   <button class="tab-btn inv-tab" onclick="showTab('inversion')">📊 Inversión Scania</button>
-  <button id="btn-guardar-manual" onclick="guardarManual()" style="margin-left:auto;margin-right:8px;align-self:center;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:background .15s" onmouseover="this.style.background='var(--accent-h)'" onmouseout="this.style.background='var(--accent)'">
-    ☁️ Guardar
-  </button>
+  <button class="tab-btn" style="color:#7c3aed" onclick="showTab('inflacion')" id="tab-inflacion">📈 Inflación</button>
+  <button onclick="guardarManual()" style="margin-left:auto;margin-right:8px;align-self:center;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s" onmouseover="this.style.background='var(--accent-h)'" onmouseout="this.style.background='var(--accent)'">☁️ Guardar</button>
 </div>
 
 <main>
@@ -530,6 +527,99 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
   <div class="res-card" id="roi-card"></div>
 
 </div>
+
+<!-- ══════════════ INFLACIÓN ══════════════ -->
+<div class="panel" id="panel-inflacion">
+
+  <div style="background:linear-gradient(135deg,#3b0764 0%,#6d28d9 60%,#7c3aed 100%);border-radius:11px;padding:22px 24px;margin-bottom:1.2rem;color:#fff;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);pointer-events:none"></div>
+    <h2 style="font-family:'DM Serif Display',serif;font-size:1.35rem;margin-bottom:4px">Simulador de Inflación en Pesos Argentinos</h2>
+    <p style="font-size:.8rem;color:rgba(255,255,255,.65)">Proyección mes a mes: costos, ingresos, cuota Scania y resultado neto con inflación diferencial. Identifica el umbral a partir del cual el crédito deja de ser conveniente.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Parámetros de inflación mensual</span>
+      <span class="badge" style="background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe">Simulador</span>
+    </div>
+    <div class="params-grid">
+      <div class="param-field">
+        <span class="param-label">Inflación costos fijos (% / mes)</span>
+        <input type="number" id="inf-fijos" value="4.0" min="0" max="200" step="0.1" oninput="renderInflacion()">
+        <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Patentes, seguros, cargas sociales</span>
+      </div>
+      <div class="param-field">
+        <span class="param-label">Inflación costos variables (% / mes)</span>
+        <input type="number" id="inf-vars" value="5.0" min="0" max="200" step="0.1" oninput="renderInflacion()">
+        <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Gasoil, cubiertas, aceites, filtros</span>
+      </div>
+      <div class="param-field">
+        <span class="param-label">Ajuste de tarifa / ingresos (% / mes)</span>
+        <input type="number" id="inf-tarifa" value="3.0" min="0" max="200" step="0.1" oninput="renderInflacion()">
+        <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Actualización del flete en pesos</span>
+      </div>
+      <div class="param-field">
+        <span class="param-label">Devaluación USD (% / mes)</span>
+        <input type="number" id="inf-tc" value="2.0" min="0" max="200" step="0.1" oninput="renderInflacion()">
+        <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Impacta en el valor de la cuota Scania en $</span>
+      </div>
+      <div class="param-field">
+        <span class="param-label">Horizonte de análisis (meses)</span>
+        <input type="number" id="inf-meses" value="24" min="6" max="60" step="1" oninput="renderInflacion()">
+        <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Máx. 24 con cuota Scania activa</span>
+      </div>
+      <div class="param-field">
+        <span class="param-label">Incluir cuota Scania</span>
+        <select id="inf-incluir-scania" oninput="renderInflacion()">
+          <option value="1">Sí — con financiación Scania</option>
+          <option value="0">No — sin financiación (solo costos op.)</option>
+        </select>
+        <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Compara ambos escenarios</span>
+      </div>
+    </div>
+    <div style="padding:0 18px 14px">
+      <div class="info-box" style="background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6;margin:0">
+        <span style="color:#4c1d95">Método:</span> El mes 1 usa los valores actuales del sistema. Cada mes: Costos fijos se multiplican por (1 + inf_fijos/100), costos variables por (1 + inf_vars/100), ingresos por (1 + inf_tarifa/100), y el tipo de cambio por (1 + dev_usd/100). La cuota en USD es fija según el contrato; solo cambia su valor en $ por la devaluación.
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="inf-kpis"></div>
+
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="card-head">
+      <span class="card-title">Análisis de umbral — ¿Hasta qué inflación conviene tomar el crédito?</span>
+      <span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a">Punto de quiebre</span>
+    </div>
+    <div id="inf-quiebre-body" style="padding:16px 18px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Proyección mensual detallada</span>
+      <span class="badge" style="background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe">Mes a mes</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="cuotas-table">
+        <thead><tr>
+          <th style="text-align:center;width:4%">Mes</th>
+          <th>CF ($)</th>
+          <th>CV ($)</th>
+          <th>Total costos ($)</th>
+          <th>Ingresos ($)</th>
+          <th>Resultado op. ($)</th>
+          <th>Cuota Scania ($)</th>
+          <th>Resultado neto ($)</th>
+          <th>Acumulado ($)</th>
+          <th>TC USD</th>
+        </tr></thead>
+        <tbody id="inf-body"></tbody>
+        <tfoot id="inf-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+</div>
 </main>
 
 <script>
@@ -636,7 +726,8 @@ function recalc(){
   filtros.forEach(f=>{f.i=km>0&&f.vu>0?Math.round(f.pr*f.cant/f.vu*km):0;});
   renderAll(km,totalTn);
   renderInversion();
-  // Guardado automático con debounce — SOLO si no estamos en medio de una carga
+  renderInflacion();
+  // Guardado automático con debounce — solo si no estamos cargando datos
   if(!_cargando){
     clearTimeout(window._saveTimer);
     window._saveTimer = setTimeout(guardarEstado, 1000);
@@ -887,7 +978,7 @@ function renderInversion(){
 /* ══════════════════════════════════════════════════════
    TABS / AGREGAR
 ══════════════════════════════════════════════════════ */
-const TAB_ORDER=['fijos','variables','p-operativo','p-gasoil','p-aceites','p-filtros','resumen','inversion'];
+const TAB_ORDER=['fijos','variables','p-operativo','p-gasoil','p-aceites','p-filtros','resumen','inversion','inflacion'];
 function showTab(name){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -907,6 +998,273 @@ function addVar(){
   vars.push({c,q:parseFloat(document.getElementById('nv-q').value)||1,u:document.getElementById('nv-u').value,i:parseFloat(document.getElementById('nv-i').value)||0,key:'manual_'+Date.now()});
   ['nv-c','nv-q','nv-i'].forEach(id=>document.getElementById(id).value='');
   recalc();
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER INFLACIÓN
+══════════════════════════════════════════════════════ */
+function renderInflacion(){
+  const infF   = gp('inf-fijos')  / 100;
+  const infV   = gp('inf-vars')   / 100;
+  const infT   = gp('inf-tarifa') / 100;
+  const infTC  = gp('inf-tc')     / 100;
+  const meses  = Math.min(Math.max(Math.round(gp('inf-meses')), 1), 60);
+  const conScania = parseInt(document.getElementById('inf-incluir-scania').value) === 1;
+
+  // Base mes 0 (valores actuales del sistema)
+  const km   = gp('p-km');
+  const vj   = gp('p-viajes');
+  const tnV  = gp('p-tn');
+  const tar0 = gp('p-tarifa');
+  const totalTn0 = vj * tnV;
+
+  const totF0 = fijos.reduce((a,b)=>a+b.i, 0);
+  const totVbase0 = vars.reduce((a,b)=>a+b.i, 0);
+  const totAceites0 = aceites.reduce((a,b)=>a+b.i, 0);
+  const totFiltros0 = filtros.reduce((a,b)=>a+b.i, 0);
+  const totV0 = totVbase0 + totAceites0 + totFiltros0;
+  const tc0   = gp('sc-tc');
+  const plazoScania = Math.min(Math.round(gp('sc-plazo')), 24);
+
+  let cfAct = totF0;
+  let cvAct = totV0;
+  let tarAct = tar0;
+  let tcAct  = tc0;
+
+  let acum = 0;
+  let acumSinScania = 0;
+  let totCF=0, totCV=0, totIng=0, totResOp=0, totCuota=0, totResNeto=0;
+
+  const rows = [];
+
+  for(let m = 1; m <= meses; m++){
+    if(m > 1){
+      cfAct  *= (1 + infF);
+      cvAct  *= (1 + infV);
+      tarAct *= (1 + infT);
+      tcAct  *= (1 + infTC);
+    }
+    const totalTnM = totalTn0; // toneladas constantes (cambia la tarifa, no las tn)
+    const ingM  = totalTnM * tarAct;
+    const totCM = cfAct + cvAct;
+    const resOpM = ingM - totCM;
+
+    let cuotaARS = 0;
+    if(conScania && m <= plazoScania){
+      const q = CUOTAS_PDF[m-1];
+      cuotaARS = q.final * tcAct;
+    }
+
+    const resNetoM = resOpM - cuotaARS;
+    acum += resNetoM;
+    acumSinScania += resOpM;
+
+    totCF   += cfAct;
+    totCV   += cvAct;
+    totIng  += ingM;
+    totResOp+= resOpM;
+    totCuota+= cuotaARS;
+    totResNeto += resNetoM;
+
+    rows.push({m, cf:cfAct, cv:cvAct, totC:totCM, ing:ingM, resOp:resOpM, cuota:cuotaARS, resNeto:resNetoM, acum, tc:tcAct});
+  }
+
+  // ── TABLA ──
+  document.getElementById('inf-body').innerHTML = rows.map(r=>{
+    const clsOp   = r.resOp>=0   ? 'pos' : 'neg';
+    const clsNeto = r.resNeto>=0  ? 'pos' : 'neg';
+    const clsAcum = r.acum>=0     ? 'pos' : 'neg';
+    return`<tr>
+      <td style="text-align:center;font-weight:600">${r.m}</td>
+      <td class="mono" style="font-size:.72rem;color:var(--muted)">$${fmt(r.cf)}</td>
+      <td class="mono" style="font-size:.72rem;color:var(--muted)">$${fmt(r.cv)}</td>
+      <td class="mono" style="font-size:.72rem;font-weight:500">$${fmt(r.totC)}</td>
+      <td class="mono" style="font-size:.72rem;color:var(--green)">$${fmt(r.ing)}</td>
+      <td class="mono col-resultado ${clsOp}">${r.resOp>=0?'+':'-'}$${fmt(Math.abs(r.resOp))}</td>
+      <td class="mono col-cuota-ars" style="font-size:.72rem">${conScania&&r.cuota>0?'$'+fmt(r.cuota):'—'}</td>
+      <td class="mono col-resultado ${clsNeto}" style="font-weight:700">${r.resNeto>=0?'+':'-'}$${fmt(Math.abs(r.resNeto))}</td>
+      <td class="mono col-resultado ${clsAcum}">${r.acum>=0?'+':'-'}$${fmt(Math.abs(r.acum))}</td>
+      <td class="mono" style="font-size:.71rem;color:var(--muted)">${fmt(r.tc)}</td>
+    </tr>`;
+  }).join('');
+
+  const clsTot = totResNeto>=0?'var(--green)':'var(--red)';
+  document.getElementById('inf-foot').innerHTML=`<tr>
+    <td style="text-align:left">TOTAL</td>
+    <td class="mono">$${fmt(totCF)}</td>
+    <td class="mono">$${fmt(totCV)}</td>
+    <td class="mono">$${fmt(totCF+totCV)}</td>
+    <td class="mono" style="color:var(--green)">$${fmt(totIng)}</td>
+    <td class="mono" style="color:var(--green)">+$${fmt(totResOp)}</td>
+    <td class="mono" style="color:var(--red)">${totCuota>0?'$'+fmt(totCuota):'—'}</td>
+    <td class="mono" style="color:${clsTot}">${totResNeto>=0?'+':'-'}$${fmt(Math.abs(totResNeto))}</td>
+    <td class="mono" style="color:${clsTot}">${acum>=0?'+':'-'}$${fmt(Math.abs(acum))}</td>
+    <td>—</td>
+  </tr>`;
+
+  // ── KPIs ──
+  const resOpPromMes = totResOp / meses;
+  const resNetoPromMes = totResNeto / meses;
+  const cfFinal = rows[rows.length-1].cf;
+  const cvFinal = rows[rows.length-1].cv;
+  const ingFinal = rows[rows.length-1].ing;
+  const tcFinal  = rows[rows.length-1].tc;
+  const infTotalF = ((cfFinal/totF0)-1)*100;
+  const infTotalV = ((cvFinal/totV0)-1)*100;
+  const infTotalT = ((ingFinal/totalTn0 / tar0)-1)*100;
+
+  document.getElementById('inf-kpis').innerHTML=`
+    <div class="kpi ${resNetoPromMes>=0?'green':'red'}">
+      <div class="kl">Resultado neto prom. / mes</div>
+      <div class="kv">${resNetoPromMes>=0?'+':'-'}$${fmt(Math.abs(resNetoPromMes))}</div>
+      <div class="ks">Promedio en ${meses} meses</div>
+    </div>
+    <div class="kpi ${totResNeto>=0?'green':'red'}">
+      <div class="kl">Resultado neto acumulado</div>
+      <div class="kv">${totResNeto>=0?'+':'-'}$${fmt(Math.abs(totResNeto))}</div>
+      <div class="ks">Total ${meses} meses</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kl">CF al mes ${meses}</div>
+      <div class="kv">$${fmt(cfFinal)}</div>
+      <div class="ks">+${fmtD(infTotalF,1)}% vs mes 1</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kl">CV al mes ${meses}</div>
+      <div class="kv">$${fmt(cvFinal)}</div>
+      <div class="ks">+${fmtD(infTotalV,1)}% vs mes 1</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kl">Ingreso al mes ${meses}</div>
+      <div class="kv">$${fmt(ingFinal)}</div>
+      <div class="ks">+${fmtD(infTotalT,1)}% vs mes 1</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kl">TC al mes ${meses}</div>
+      <div class="kv">$${fmt(tcFinal)}</div>
+      <div class="ks">+${fmtD(((tcFinal/tc0)-1)*100,1)}% desde TC ${fmt(tc0)}</div>
+    </div>
+  `;
+
+  // ── ANÁLISIS DE UMBRAL ──
+  // Busca el mes donde el resultado neto PRIMERO se vuelve negativo (si aplica)
+  // También calcula la inflación máxima de costos variables a la que el resultado acumulado sigue positivo
+  const primerMesNegativo = rows.find(r=>r.resNeto<0);
+  const primerMesOpNegativo = rows.find(r=>r.resOp<0);
+
+  // Busqueda binaria: inflación variable máxima admisible (manteniendo las demás constantes)
+  function calcResultadoNeto(infVarPct){
+    let cf=totF0, cv=totV0, tar=tar0, tc=tc0, acum=0;
+    const iv = infVarPct/100;
+    for(let m=1;m<=meses;m++){
+      if(m>1){cf*=(1+infF);cv*=(1+iv);tar*=(1+infT);tc*=(1+infTC);}
+      const ing=totalTn0*tar, resOp=ing-cf-cv;
+      let cuota=0;
+      if(conScania&&m<=plazoScania) cuota=CUOTAS_PDF[m-1].final*tc;
+      acum+=resOp-cuota;
+    }
+    return acum;
+  }
+
+  let umbralInfV = null;
+  if(calcResultadoNeto(0) > 0){
+    let lo=0, hi=200;
+    for(let iter=0;iter<60;iter++){
+      const mid=(lo+hi)/2;
+      if(calcResultadoNeto(mid)>0) lo=mid; else hi=mid;
+      if(hi-lo<0.01) break;
+    }
+    umbralInfV = lo;
+  }
+
+  // También: inflación de tarifa mínima necesaria para mantener resultado positivo
+  function calcResultadoNetoTarifa(infTarPct){
+    let cf=totF0, cv=totV0, tar=tar0, tc=tc0, acum=0;
+    const it = infTarPct/100;
+    for(let m=1;m<=meses;m++){
+      if(m>1){cf*=(1+infF);cv*=(1+infV);tar*=(1+it);tc*=(1+infTC);}
+      const ing=totalTn0*tar, resOp=ing-cf-cv;
+      let cuota=0;
+      if(conScania&&m<=plazoScania) cuota=CUOTAS_PDF[m-1].final*tc;
+      acum+=resOp-cuota;
+    }
+    return acum;
+  }
+
+  let umbralTarifa = null;
+  {
+    let lo=0, hi=200;
+    let lo_neg=false;
+    if(calcResultadoNetoTarifa(0)<0){
+      for(let iter=0;iter<60;iter++){
+        const mid=(lo+hi)/2;
+        if(calcResultadoNetoTarifa(mid)<0) lo=mid; else hi=mid;
+        if(hi-lo<0.01) break;
+      }
+      umbralTarifa = hi;
+    }
+  }
+
+  const mesActual_infV = gp('inf-vars');
+  const mesActual_infT = gp('inf-tarifa');
+  const gapCV = umbralInfV !== null ? umbralInfV - mesActual_infV : null;
+  const conviene = totResNeto >= 0;
+
+  let quiebreHTML = '';
+
+  // Semáforo general
+  const semaforoColor = conviene ? '#16a34a' : '#dc2626';
+  const semaforoLabel = conviene ? '✅ CONVENIENTE' : '❌ NO CONVENIENTE';
+  const semaforoText  = conviene
+    ? `Con los parámetros actuales de inflación, el resultado neto acumulado en ${meses} meses es POSITIVO. Tomar el crédito Scania es financieramente viable bajo este escenario.`
+    : `Con los parámetros actuales de inflación, el resultado neto acumulado en ${meses} meses es NEGATIVO. El crédito Scania destruye valor bajo este escenario.`;
+
+  quiebreHTML += `
+    <div style="background:${conviene?'#f0fdf4':'#fef2f2'};border:1px solid ${conviene?'#86efac':'#fca5a5'};border-radius:9px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px">
+      <div style="font-size:1.6rem">${conviene?'✅':'❌'}</div>
+      <div>
+        <div style="font-weight:700;color:${semaforoColor};font-size:.92rem;margin-bottom:3px">${semaforoLabel}</div>
+        <div style="font-size:.8rem;color:var(--muted)">${semaforoText}</div>
+      </div>
+    </div>`;
+
+  // Umbral inflación variable
+  if(umbralInfV !== null){
+    const margen = umbralInfV - mesActual_infV;
+    const colorU = margen>3?'#16a34a':margen>0?'#d97706':'#dc2626';
+    quiebreHTML += `
+    <div class="res-card" style="margin-bottom:10px">
+      <div class="res-row"><div class="rl">Inflación variable actual simulada</div><div class="rv" style="color:var(--amber)">${fmtD(mesActual_infV,1)}% / mes</div></div>
+      <div class="res-row"><div class="rl">Inflación variable máxima admisible (resultado acum. = 0)</div><div class="rv" style="color:${colorU};font-weight:700">${fmtD(umbralInfV,2)}% / mes</div></div>
+      <div class="res-row total"><div class="rl">Margen de seguridad en costos variables</div><div class="rv" style="color:${colorU}">${margen>=0?'+':''}${fmtD(margen,2)} pp</div></div>
+      <div class="res-row"><div class="rl">Interpretación</div><div class="rv" style="font-size:.8rem;max-width:380px;text-align:right;color:var(--muted)">${margen>=0?`Podría subir la inflación variable hasta ${fmtD(umbralInfV,1)}% mensual y el proyecto seguiría siendo viable`:`La inflación variable actual ya supera el umbral máximo tolerable`}</div></div>
+    </div>`;
+  } else {
+    quiebreHTML += `<div class="info-box" style="margin-bottom:10px">Con inflación variable = 0% el resultado acumulado ya es negativo. Los costos fijos/cuota superan los ingresos proyectados.</div>`;
+  }
+
+  // Umbral tarifa mínima
+  if(umbralTarifa !== null){
+    quiebreHTML += `
+    <div class="res-card" style="margin-bottom:10px">
+      <div class="res-row"><div class="rl">Actualización de tarifa actual simulada</div><div class="rv" style="color:var(--amber)">${fmtD(mesActual_infT,1)}% / mes</div></div>
+      <div class="res-row"><div class="rl">Actualización mínima de tarifa para resultado acum. = 0</div><div class="rv" style="color:var(--red);font-weight:700">${fmtD(umbralTarifa,2)}% / mes</div></div>
+      <div class="res-row total"><div class="rl">Brecha tarifa actual vs mínima necesaria</div><div class="rv" style="color:${mesActual_infT>=umbralTarifa?'var(--green)':'var(--red)'}">${fmtD(mesActual_infT - umbralTarifa, 2)} pp</div></div>
+      <div class="res-row"><div class="rl">Interpretación</div><div class="rv" style="font-size:.8rem;max-width:380px;text-align:right;color:var(--muted)">${mesActual_infT>=umbralTarifa?'La tarifa se actualiza lo suficiente para cubrir inflación y cuota':'Necesita negociar actualizaciones de tarifa superiores al nivel actual para que el proyecto sea viable'}</div></div>
+    </div>`;
+  } else {
+    quiebreHTML += `<div class="info-box green" style="margin-bottom:10px">Con la tarifa actual proyectada el resultado es positivo en cualquier nivel de actualización ≥ 0%.</div>`;
+  }
+
+  // Primer mes de resultado negativo
+  if(primerMesNegativo){
+    quiebreHTML += `<div class="info-box" style="background:#fffbeb;border-color:#fde68a;color:#92400e;margin-bottom:10px"><span style="color:#78350f">⚠ Primer mes con resultado neto negativo:</span> Mes ${primerMesNegativo.m} — resultado: ${fmtD(primerMesNegativo.resNeto/1000,1)}k pesos. A partir de allí el proyecto empieza a consumir reservas.</div>`;
+  }
+  if(primerMesOpNegativo){
+    quiebreHTML += `<div class="info-box" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b;margin-bottom:10px"><span>🔴 Primer mes con resultado operativo negativo (sin cuota):</span> Mes ${primerMesOpNegativo.m} — los costos superan los ingresos incluso sin pagar la cuota Scania.</div>`;
+  }
+
+  document.getElementById('inf-quiebre-body').innerHTML = quiebreHTML;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -941,23 +1299,18 @@ function verificarSesion(){
 
 /* ══════════════════════════════════════════════════════
    PERSISTENCIA — Firebase + localStorage
-   
-   LÓGICA CORRECTA:
-   - Guardar: captura fijos/vars/aceites/filtros + params (inputs con id)
-   - Restaurar: primero carga las variables JS, luego los params,
-     y llama recalcSueldo() UNA SOLA VEZ al final con _cargando=true
-     para que no dispare un guardado automático
 ══════════════════════════════════════════════════════ */
 let _cargando = false;
 
-// IDs de todos los parámetros numéricos que hay que guardar/restaurar
 const PARAM_IDS = [
   'p-km','p-viajes','p-tn','p-tarifa','p-repuestos',
   'vu-del','vu-trac','vu-acop',
   'pr-del','pr-trac','pr-acop',
   'q-del','q-trac','q-acop',
   'cons-gasoil','pr-gasoil',
-  'inv-precio','inv-enganche','inv-plazo','inv-tna','inv-tc'
+  'inv-precio','inv-enganche','inv-plazo','inv-tna','inv-tc',
+  'sc-valor','sc-tasa','sc-tc',
+  'inf-tasa-f','inf-tasa-v','inf-tc-ini','inf-tar-ini','inf-meses'
 ];
 
 function obtenerEstado(){
@@ -998,30 +1351,17 @@ function restaurarDatos(d){
   if(!d) return;
   _cargando = true;
   try {
-    // 1) Restaurar variables JS
     if(d.fijos   && d.fijos.length)   fijos   = d.fijos;
     if(d.vars    && d.vars.length)     vars    = d.vars;
     if(d.aceites && d.aceites.length)  aceites = d.aceites;
     if(d.filtros && d.filtros.length)  filtros = d.filtros;
-
-    // 2) Restaurar parámetros en el DOM ANTES de recalcular
     if(d.params){
       Object.entries(d.params).forEach(([id, val]) => {
         const el = document.getElementById(id);
         if(el) el.value = val;
       });
     }
-    // soporte legado: si venía con "inputs" en lugar de "params"
-    if(d.inputs && !d.params){
-      Object.entries(d.inputs).forEach(([id, val]) => {
-        const el = document.getElementById(id);
-        if(el) el.value = val;
-      });
-    }
-
-    // 3) Recalcular UNA sola vez con los datos ya restaurados
     recalcSueldo();
-
   } finally {
     _cargando = false;
   }
@@ -1073,11 +1413,9 @@ function mostrarGuardado(msg){
   _toastTimer = setTimeout(()=>{ t.style.opacity='0'; }, 2500);
 }
 
-/* ══════════════════════════════════════════════════════
-   INICIO
-══════════════════════════════════════════════════════ */
+/* INICIO */
 verificarSesion();
-cargarEstado(); // ya llama recalcSueldo() internamente al restaurar
+cargarEstado(); // ya llama recalcSueldo() internamente
 </script>
 </body>
 </html>
