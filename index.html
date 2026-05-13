@@ -12,7 +12,6 @@
   import { getDatabase, ref, set, get }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // ▼▼▼ REEMPLAZÁ CON TUS CREDENCIALES DE FIREBASE ▼▼▼
   const firebaseConfig = {
     apiKey:            "AIzaSyAjnw2jFbyKbTR0P69O8v6_BuNbwNiDGgg",
     authDomain:        "costoscamiones.firebaseapp.com",
@@ -22,7 +21,6 @@
     messagingSenderId: "1018895520240",
     appId:             "1:1018895520240:web:87ac891b00795c0eca0d35"
   };
-  // ▲▲▲ FIN CREDENCIALES ▲▲▲
 
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
@@ -231,10 +229,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
     <div style="font-size:13px;color:var(--muted);margin-bottom:28px">Ingresá la contraseña para continuar</div>
     <input type="password" id="login-input" placeholder="••••••••" autocomplete="current-password"
       onkeydown="if(event.key==='Enter') verificarPassword()"
-      style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:15px;text-align:center;letter-spacing:3px;margin-bottom:12px;transition:border-color .15s;color:var(--text)">
+      style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:15px;text-align:center;letter-spacing:3px;margin-bottom:12px;color:var(--text);transition:border-color .15s">
     <div id="login-error" style="font-size:12px;color:var(--red);background:#fef2f2;border-radius:6px;padding:8px 12px;margin-bottom:10px;display:none">❌ Contraseña incorrecta. Intentá de nuevo.</div>
     <button onclick="verificarPassword()"
-      style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px">
+      style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px">
       Ingresar →
     </button>
     <div style="font-size:11px;color:var(--muted)">Fiat Cursor 330 · Scania G 460</div>
@@ -831,10 +829,6 @@ function recalc(){
   renderAll(km,totalTn);
   renderInversion();
   renderInflacion();
-  if(!_cargando){
-    clearTimeout(window._saveTimer);
-    window._saveTimer = setTimeout(guardarEstado, 1000);
-  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1348,7 +1342,7 @@ const PARAM_IDS = [
   'q-del','q-trac','q-acop',
   'cons-gasoil','pr-gasoil',
   'sc-valor','sc-tasa','sc-tc','sc-anticipo','sc-plazo',
-  'inf-anio-inicio','inf-anios','inf-tarifa-actual-label',
+  'inf-anio-inicio','inf-anios',
   'inf-tasa-f','inf-tasa-v','inf-tc-ini','inf-tar-ini','inf-meses'
 ];
 
