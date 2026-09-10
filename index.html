@@ -534,22 +534,22 @@ hr.div{border:none;border-top:1px solid var(--border);margin:1.2rem 0}
     <div class="params-grid">
       <div class="param-field">
         <span class="param-label">Inflación costos fijos (% / mes)</span>
-        <input type="number" id="inf-fijos" value="4.0" min="0" max="200" step="0.1" oninput="renderInflacion()">
+        <input type="number" id="inf-fijos" value="4.0" min="0" max="200" step="0.1" oninput="renderInflacionCalc()">
         <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Patentes, seguros, cargas sociales</span>
       </div>
       <div class="param-field">
         <span class="param-label">Inflación costos variables (% / mes)</span>
-        <input type="number" id="inf-vars" value="5.0" min="0" max="200" step="0.1" oninput="renderInflacion()">
+        <input type="number" id="inf-vars" value="5.0" min="0" max="200" step="0.1" oninput="renderInflacionCalc()">
         <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Gasoil, cubiertas, aceites, filtros</span>
       </div>
       <div class="param-field">
         <span class="param-label">Devaluación USD (% / mes)</span>
-        <input type="number" id="inf-tc" value="2.0" min="0" max="200" step="0.1" oninput="renderInflacion()">
+        <input type="number" id="inf-tc" value="2.0" min="0" max="200" step="0.1" oninput="renderInflacionCalc()">
         <span style="font-size:.71rem;color:var(--muted);margin-top:2px">Sube el valor $ de la cuota Scania</span>
       </div>
       <div class="param-field">
         <span class="param-label">Incluir cuota Scania</span>
-        <select id="inf-incluir-scania" oninput="renderInflacion()">
+        <select id="inf-incluir-scania" oninput="renderInflacionCalc()">
           <option value="1">Sí — con financiación Scania</option>
           <option value="0">No — sin financiación</option>
         </select>
@@ -1141,7 +1141,7 @@ function renderTarifaInputs(){
         <span style="font-size:.75rem;color:var(--muted)">$</span>
         <input type="number" value="${Math.round(tr.tarifa)}" min="0" step="1"
           style="font-size:.85rem;font-weight:600;text-align:right;border-color:${isCurrent?'#bfdbfe':'var(--border)'}"
-          oninput="tarifasTrimestre[${i}].tarifa=parseFloat(this.value)||0;renderInflacion()">
+          oninput="actualizarTarifaTrimestre(${i}, this.value)">
       </div>
       <div style="font-size:.68rem;color:var(--muted);margin-top:4px">/ tonelada</div>
     </div>`;
@@ -1157,6 +1157,28 @@ function sincronizarTarifaActual(){
 }
 
 function renderInflacion(){
+  const anio  = parseInt(document.getElementById('inf-anio-inicio').value) || 2026;
+  const anios = parseInt(document.getElementById('inf-anios').value) || 2;
+
+  // Rebuild trimestres if length mismatch (cambio de año/cantidad de años)
+  if(tarifasTrimestre.length !== anios*4) buildTrimestres();
+  renderTarifaInputs();
+
+  renderInflacionCalc();
+}
+
+// Actualiza SOLO el valor en memoria de una tarifa trimestral y
+// recalcula la tabla, sin reconstruir los inputs de "tarifa por trimestre"
+// (evita perder el foco / el cursor mientras se está escribiendo).
+function actualizarTarifaTrimestre(i, valor){
+  tarifasTrimestre[i].tarifa = parseFloat(valor) || 0;
+  renderInflacionCalc();
+}
+
+// Núcleo de cálculo + render de la tabla de inflación. No toca el
+// contenedor de inputs de "tarifa por trimestre" — así se puede llamar
+// en cada tecleo sin destruir el input que se está editando.
+function renderInflacionCalc(){
   const anio      = parseInt(document.getElementById('inf-anio-inicio').value) || 2026;
   const anios     = parseInt(document.getElementById('inf-anios').value) || 2;
   const infF      = gp('inf-fijos') / 100;
@@ -1164,10 +1186,6 @@ function renderInflacion(){
   const infTC     = gp('inf-tc')    / 100;
   const conScania = parseInt(document.getElementById('inf-incluir-scania').value) === 1;
   const meses     = anios * 12;
-
-  // Rebuild trimestres if length mismatch
-  if(tarifasTrimestre.length !== anios*4) buildTrimestres();
-  renderTarifaInputs();
 
   // Base values
   const totF0     = fijos.reduce((a,b)=>a+b.i,0);
@@ -1341,9 +1359,9 @@ const PARAM_IDS = [
   'pr-del','pr-trac','pr-acop',
   'q-del','q-trac','q-acop',
   'cons-gasoil','pr-gasoil',
-  'sc-valor','sc-tasa','sc-tc','sc-anticipo','sc-plazo',
+  'sc-valor','sc-tasa','sc-tc','sc-anticipo','sc-plazo','sc-financiado','sc-cuota-usd',
   'inf-anio-inicio','inf-anios',
-  'inf-tasa-f','inf-tasa-v','inf-tc-ini','inf-tar-ini','inf-meses'
+  'inf-fijos','inf-vars','inf-tc','inf-incluir-scania'
 ];
 
 function obtenerEstado(){
@@ -1357,6 +1375,8 @@ function obtenerEstado(){
     vars:    JSON.parse(JSON.stringify(vars)),
     aceites: JSON.parse(JSON.stringify(aceites)),
     filtros: JSON.parse(JSON.stringify(filtros)),
+    tarifasTrimestre: JSON.parse(JSON.stringify(tarifasTrimestre)),
+    scenData: typeof scenData !== 'undefined' ? JSON.parse(JSON.stringify(scenData)) : undefined,
     params,
     ts: new Date().toISOString()
   };
@@ -1380,6 +1400,16 @@ function guardarManual(){
   guardarEstado();
 }
 
+// Autoguardado: cualquier cambio en un input/select dispara un guardado
+// silencioso (con debounce) para que nada se pierda al recargar la página.
+function guardadoAutomatico(){
+  if(_cargando) return;
+  clearTimeout(window._saveTimer);
+  window._saveTimer = setTimeout(guardarEstado, 900);
+}
+document.addEventListener('input',  guardadoAutomatico, true);
+document.addEventListener('change', guardadoAutomatico, true);
+
 function restaurarDatos(d){
   if(!d) return;
   _cargando = true;
@@ -1388,6 +1418,8 @@ function restaurarDatos(d){
     if(d.vars    && d.vars.length)     vars    = d.vars;
     if(d.aceites && d.aceites.length)  aceites = d.aceites;
     if(d.filtros && d.filtros.length)  filtros = d.filtros;
+    if(d.tarifasTrimestre && d.tarifasTrimestre.length) tarifasTrimestre = d.tarifasTrimestre;
+    if(d.scenData && d.scenData.length && typeof scenData !== 'undefined') scenData = d.scenData;
     if(d.params){
       Object.entries(d.params).forEach(([id, val]) => {
         const el = document.getElementById(id);
@@ -1395,6 +1427,8 @@ function restaurarDatos(d){
       });
     }
     recalcSueldo();
+    if(typeof renderTarifaInputs === 'function') renderTarifaInputs();
+    if(document.getElementById('panel-escenarios') && document.getElementById('panel-escenarios').classList.contains('active') && typeof renderEscenarios==='function') renderEscenarios();
   } finally {
     _cargando = false;
   }
